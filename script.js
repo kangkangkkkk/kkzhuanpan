@@ -26,12 +26,12 @@ class LuckyWheel {
 
         // Wheel properties
         this.options = [
-            { text: '免费披萨', color: '#FF6B6B' },
-            { text: '咖啡券', color: '#4ECDC4' },
-            { text: '电影票', color: '#FFD166' },
-            { text: '亚马逊礼品卡', color: '#06D6A0' },
-            { text: '休假一天', color: '#118AB2' },
-            { text: '神秘奖品', color: '#9D50BB' }
+            { text: '披萨', color: '#FF6B6B' },
+            { text: '汉堡', color: '#FFA726' },
+            { text: '寿司', color: '#4ECDC4' },
+            { text: '拉面', color: '#FFD166' },
+            { text: '沙拉', color: '#06D6A0' },
+            { text: '冰淇淋', color: '#9D50BB' }
         ];
         this.currentColor = '#FF6B6B';
         this.isSpinning = false;
@@ -193,6 +193,12 @@ class LuckyWheel {
             this.optionsList.appendChild(optionElement);
         });
 
+        // Attach event listeners to option buttons
+        this.attachOptionEventListeners();
+    }
+
+    // Attach event listeners to option buttons
+    attachOptionEventListeners() {
         // Add event listeners to delete buttons
         document.querySelectorAll('.delete-option').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -226,7 +232,7 @@ class LuckyWheel {
                 this.options = newOrder;
                 this.drawWheel();
                 this.renderOptionsList();
-                toastr.success('选项重新排序成功！');
+                toastr.success('食物选项重新排序成功！');
             }
         });
     }
@@ -235,7 +241,7 @@ class LuckyWheel {
     addOption() {
         const text = this.optionInput.value.trim();
         if (!text) {
-            toastr.error('请输入选项文本');
+            toastr.error('请输入食物选项');
             return;
         }
 
@@ -252,47 +258,97 @@ class LuckyWheel {
         this.optionInput.value = '';
         this.drawWheel();
         this.renderOptionsList();
-        toastr.success(`选项"${text}"已添加`);
+        toastr.success(`食物选项"${text}"已添加`);
     }
 
     // Delete an option
     deleteOption(index) {
         if (this.options.length <= 2) {
-            toastr.error('至少需要2个选项');
+            toastr.error('至少需要2种食物');
             return;
         }
 
         const deletedOption = this.options.splice(index, 1)[0];
         this.drawWheel();
         this.renderOptionsList();
-        toastr.info(`选项"${deletedOption.text}"已删除`);
+        toastr.info(`食物选项"${deletedOption.text}"已删除`);
     }
 
-    // Edit an option
+    // Edit an option inline
     editOption(index) {
-        const newText = prompt('编辑选项文本：', this.options[index].text);
-        if (newText && newText.trim()) {
-            this.options[index].text = newText.trim();
+        const option = this.options[index];
+        const optionItem = this.optionsList.querySelector(`.option-item[data-index="${index}"]`);
+        if (!optionItem) return;
+
+        // Save original content
+        const originalContent = optionItem.innerHTML;
+
+        // Create edit form
+        optionItem.innerHTML = `
+            <div class="option-color" style="background-color: ${option.color}"></div>
+            <div class="edit-form" style="display: flex; flex: 1; gap: 10px; align-items: center;">
+                <input type="text" class="edit-text" value="${option.text}" style="flex: 1; padding: 8px 12px; border-radius: 5px; border: 2px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif;">
+                <input type="color" class="edit-color" value="${option.color}" style="width: 40px; height: 40px; border-radius: 5px; border: 2px solid rgba(255, 255, 255, 0.2); cursor: pointer; background: transparent;">
+                <div class="edit-actions" style="display: flex; gap: 5px;">
+                    <button class="save-edit" title="保存" style="background: #06D6A0; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="fas fa-check"></i></button>
+                    <button class="cancel-edit" title="取消" style="background: #FF6B6B; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+        `;
+
+        // Focus text input
+        const textInput = optionItem.querySelector('.edit-text');
+        textInput.focus();
+        textInput.select();
+
+        // Save edit
+        optionItem.querySelector('.save-edit').addEventListener('click', () => {
+            const newText = textInput.value.trim();
+            const newColor = optionItem.querySelector('.edit-color').value;
+
+            if (!newText) {
+                toastr.error('食物选项不能为空');
+                textInput.focus();
+                return;
+            }
+
+            option.text = newText;
+            option.color = newColor;
             this.drawWheel();
             this.renderOptionsList();
-            toastr.success('选项已更新');
-        }
+            toastr.success('食物选项已更新');
+        });
+
+        // Cancel edit
+        optionItem.querySelector('.cancel-edit').addEventListener('click', () => {
+            optionItem.innerHTML = originalContent;
+            this.attachOptionEventListeners();
+        });
+
+        // Allow Enter to save, Escape to cancel
+        textInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                optionItem.querySelector('.save-edit').click();
+            } else if (e.key === 'Escape') {
+                optionItem.querySelector('.cancel-edit').click();
+            }
+        });
     }
 
-    // Reset options to default
+    // Scroll to customization section
     resetOptions() {
-        if (confirm('重置所有选项为默认值？此操作无法撤销。')) {
-            this.options = [
-                { text: '免费披萨', color: '#FF6B6B' },
-                { text: '咖啡券', color: '#4ECDC4' },
-                { text: '电影票', color: '#FFD166' },
-                { text: '亚马逊礼品卡', color: '#06D6A0' },
-                { text: '休假一天', color: '#118AB2' },
-                { text: '神秘奖品', color: '#9D50BB' }
-            ];
-            this.drawWheel();
-            this.renderOptionsList();
-            toastr.success('选项已重置为默认值');
+        const configSection = document.querySelector('.configuration-section');
+        if (configSection) {
+            configSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Add a temporary highlight effect
+            configSection.style.transition = 'box-shadow 0.5s ease';
+            configSection.style.boxShadow = '0 0 30px rgba(0, 206, 201, 0.7)';
+            setTimeout(() => {
+                configSection.style.boxShadow = '';
+            }, 1500);
+
+            toastr.info('已跳转到自定义区域');
         }
     }
 
@@ -304,7 +360,7 @@ class LuckyWheel {
         }
 
         if (this.options.length < 2) {
-            toastr.error('请至少添加2个选项以旋转');
+            toastr.error('请至少添加2种食物以选择');
             return;
         }
 
@@ -404,7 +460,7 @@ class LuckyWheel {
         this.resultDisplay.innerHTML = `
             <div>
                 <h3 style="color: ${winningOption.color}">${winningOption.text}</h3>
-                <p>恭喜！您赢得了<strong>${winningOption.text}</strong>奖品！</p>
+                <p>今晚就吃：<strong>${winningOption.text}</strong>！</p>
             </div>
         `;
 
@@ -451,7 +507,7 @@ class LuckyWheel {
 
     // Show result modal
     showResultModal(winningOption) {
-        this.winnerText.textContent = `您赢得了：${winningOption.text}！`;
+        this.winnerText.textContent = `您选择了：${winningOption.text}！`;
         this.winnerText.style.color = winningOption.color;
         this.resultModal.style.display = 'flex';
 
@@ -530,6 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display welcome message
     setTimeout(() => {
-        toastr.success('幸运大转盘已加载！添加选项并开始旋转吧！');
+        toastr.success('晚餐选择转盘已加载！添加食物选项并开始选择吧！');
     }, 1000);
 });
