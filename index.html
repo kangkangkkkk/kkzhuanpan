@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运大转盘 - 旋转赢奖</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎡</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-dharmachakra"></i> 幸运大转盘</h1>
+            <p class="subtitle">自定义选项，转动转盘，让命运来决定！</p>
+        </header>
+
+        <main class="main-content">
+            <div class="wheel-section">
+                <div class="wheel-container">
+                    <div class="wheel-wrapper">
+                        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                        <div class="wheel-center"></div>
+                        <div class="pointer">
+                            <i class="fas fa-caret-down"></i>
+                        </div>
+                    </div>
+                    <div class="wheel-controls">
+                        <button id="spinBtn" class="btn spin-btn">
+                            <i class="fas fa-play"></i> 旋转转盘
+                        </button>
+                        <button id="resetBtn" class="btn reset-btn">
+                            <i class="fas fa-redo"></i> 重置选项
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-card">
+                        <h3><i class="fas fa-trophy"></i> 上次结果</h3>
+                        <div class="result-display" id="resultDisplay">
+                            <p>转动转盘查看结果！</p>
+                        </div>
+                        <div class="result-history">
+                            <h4><i class="fas fa-history"></i> 最近旋转</h4>
+                            <ul id="historyList">
+                                <li>暂无旋转记录</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="configuration-section">
+                <div class="config-card">
+                    <h2><i class="fas fa-cog"></i> 转盘配置</h2>
+
+                    <div class="form-group">
+                        <label for="optionInput"><i class="fas fa-edit"></i> 添加新选项</label>
+                        <div class="input-group">
+                            <input type="text" id="optionInput" placeholder="输入选项文本（例如：'免费披萨'）">
+                            <button id="addOptionBtn" class="btn add-btn">
+                                <i class="fas fa-plus"></i> 添加
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-palette"></i> 选项颜色</label>
+                        <div class="color-picker">
+                            <input type="color" id="colorPicker" value="#FF6B6B">
+                            <span id="colorHex">#FF6B6B</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-sliders-h"></i> 旋转设置</label>
+                        <div class="slider-container">
+                            <label for="spinDuration">旋转时长：<span id="durationValue">5</span> 秒</label>
+                            <input type="range" id="spinDuration" min="2" max="10" value="5" step="0.5">
+                        </div>
+                        <div class="slider-container">
+                            <label for="spinPower">旋转力度：<span id="powerValue">8</span></label>
+                            <input type="range" id="spinPower" min="1" max="10" value="8">
+                        </div>
+                    </div>
+
+                    <div class="current-options">
+                        <h3><i class="fas fa-list"></i> 当前选项 (<span id="optionCount">6</span>)</h3>
+                        <div class="options-list" id="optionsList">
+                            <!-- 选项将动态添加到这里 -->
+                        </div>
+                        <p class="hint"><i class="fas fa-info-circle"></i> 至少需要2个选项才能旋转。拖拽可重新排序。</p>
+                    </div>
+                </div>
+
+                <div class="instructions-card">
+                    <h2><i class="fas fa-question-circle"></i> 使用方法</h2>
+                    <ol class="instructions-list">
+                        <li><strong>添加选项:</strong> 输入选项文本，点击"添加"或按回车键。</li>
+                        <li><strong>自定义颜色:</strong> 使用颜色选择器更改下一个扇区的颜色。</li>
+                        <li><strong>重新排序:</strong> 拖拽选项以改变它们在转盘上的顺序。</li>
+                        <li><strong>调整设置:</strong> 使用滑块控制旋转时长和力度。</li>
+                        <li><strong>旋转:</strong> 点击"旋转转盘"按钮，观看奇迹发生！</li>
+                    </ol>
+                    <div class="tip">
+                        <i class="fas fa-lightbulb"></i> <strong>小贴士:</strong> 选项越多，转盘越刺激！
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>幸运大转盘 &copy; 2026 | 为娱乐和决策而制作 <i class="fas fa-heart"></i></p>
+            <p class="footer-links">
+                <a href="#"><i class="fab fa-github"></i> GitHub</a> |
+                <a href="#"><i class="fas fa-code"></i> CodePen</a> |
+                <a href="#"><i class="fas fa-envelope"></i> 联系我们</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-award"></i> 恭喜！</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="winner-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3 id="winnerText">您赢得了：免费披萨！</h3>
+                <p class="winner-message">转盘已做出决定！请享受您的奖品。</p>
+                <div class="modal-actions">
+                    <button id="spinAgainBtn" class="btn spin-btn">再次旋转</button>
+                    <button id="closeModalBtn" class="btn reset-btn">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti container -->
+    <div id="confetti-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
